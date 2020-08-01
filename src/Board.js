@@ -20,6 +20,43 @@ export default class Board extends React.Component {
       inProgress: React.createRef(),
       complete: React.createRef(),
     }
+    this.containers = []
+  }
+  componentDidMount () {
+    Dragula(this.containers)
+      .on('drop', function (el, target, source) {
+        console.log(source);
+        if(source.classList.contains('backlog')) {
+          if(target.classList.contains('inProgress')) {
+            el.classList.remove("Card-grey");
+            el.classList.add("Card-blue");
+          }
+          else if(target.classList.contains('complete')) {
+            el.classList.remove("Card-grey");
+            el.classList.add("Card-green");
+          }
+        }
+        if(source.classList.contains('inProgress')) {
+          if(target.classList.contains('backlog')) {
+            el.classList.remove("Card-blue");
+            el.classList.add("Card-grey");
+          }
+          else if(target.classList.contains('complete')) {
+            el.classList.remove("Card-blue");
+            el.classList.add("Card-green");
+          }
+        }
+        if(source.classList.contains('complete')) {
+          if(target.classList.contains('backlog')) {
+            el.classList.remove("Card-green");
+            el.classList.add("Card-grey");
+          }
+          else if(target.classList.contains('inProgress')) {
+            el.classList.remove("Card-green");
+            el.classList.add("Card-blue");
+          }
+        }
+      });
   }
   getClients() {
     return [
@@ -50,29 +87,45 @@ export default class Board extends React.Component {
       status: companyDetails[3],
     }));
   }
-  renderSwimlane(name, clients, ref) {
+  renderSwimlane(name, state, clients, ref) {
     return (
-      <Swimlane name={name} clients={clients} dragulaRef={ref}/>
+      <Swimlane name={name} state={state} clients={clients} dragulaRef={ref}/>
     );
   }
-
+  
   render() {
+    this.swimlanes.backlog = (componentBackingInstance) => {
+      if (componentBackingInstance) {
+        this.containers.push(componentBackingInstance)
+      }
+    }
+    this.swimlanes.inProgress = (componentBackingInstance) => {
+      if (componentBackingInstance) {
+        this.containers.push(componentBackingInstance)
+      }
+    }
+    this.swimlanes.complete = (componentBackingInstance) => {
+      if (componentBackingInstance) {
+        this.containers.push(componentBackingInstance)
+      }
+    }
     return (
       <div className="Board">
         <div className="container-fluid">
           <div className="row">
             <div className="col-md-4">
-              {this.renderSwimlane('Backlog', this.state.clients.backlog, this.swimlanes.backlog)}
+              {this.renderSwimlane('Backlog', 'backlog', this.state.clients.backlog, this.swimlanes.backlog)}
+            </div>
+            <div className="col-md-4"> 
+              {this.renderSwimlane('In Progress', 'inProgress', this.state.clients.inProgress, this.swimlanes.inProgress)}
             </div>
             <div className="col-md-4">
-              {this.renderSwimlane('In Progress', this.state.clients.inProgress, this.swimlanes.inProgress)}
-            </div>
-            <div className="col-md-4">
-              {this.renderSwimlane('Complete', this.state.clients.complete, this.swimlanes.complete)}
+              {this.renderSwimlane('Complete', 'complete', this.state.clients.complete, this.swimlanes.complete)}
             </div>
           </div>
         </div>
       </div>
     );
   }
+
 }
